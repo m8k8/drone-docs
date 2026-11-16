@@ -1,0 +1,13 @@
+.DS_Store
+~$*
+*.tmp
+.env
+.env.*
+*.tlog
+*.tlog.raw
+*.BIN
+eeprom.bin
+
+# Keep planning workbooks and raw/result data local; publish Markdown guides.
+*.xlsx
+/results/
