@@ -1,21 +1,19 @@
 # 農業ドローンの設計・シミュレーション資料
 
-実機を購入する前の部品選定・重量整理と、ArduPilot SITLの手順・検証記録をまとめています。
-
-入口は[SITLの実験一覧](sitl/README.md)です。目的や機体モデルが変わるたびに、実験用のディレクトリを作って条件・結果をまとめます。
+第１弾（段階B〜D）の部品選定と、同じ構成を使うArduPilot SITLの手順・検証記録をまとめています。現在のシミュレーションは、電池込み12.3387kgの暫定モデルに統一しています。
 
 | 読みたいこと | 資料 |
 | --- | --- |
-| 第１弾（B〜D）の搭載部品、選定理由、重量 | [第１弾の部品表](hardware/prototype-01/README.md) |
-| 第１弾のSITLモデル、航路・測距の試験結果 | [実験003](sitl/experiments/003-prototype-bd/README.md) |
-| 実験の目的、現在の検証範囲、結果 | [SITLの実験一覧](sitl/README.md) |
-| 環境構築、標準機の起動、最初の飛行、終了 | [実行ガイド](sitl/guides/execution.md) |
-| 地図、姿勢、高度、テレメトリーを見る | [可視化ガイド](sitl/guides/visualization.md) |
+| 搭載部品、選定理由、重量 | [第１弾の部品表](hardware/prototype-01/README.md) |
+| 現在のモデルと実行方法の入口 | [第１弾のSITL](sitl/README.md) |
+| 基本飛行・AUTO航路・下向き測距の試験結果 | [実験003](sitl/experiments/003-prototype-bd/README.md) |
+| 環境構築と試験の実行 | [実行ガイド](sitl/guides/execution.md) |
+| 飛行軌跡・高度・測距応答を見る | [可視化ガイド](sitl/guides/visualization.md) |
 
 ## リポジトリの役割
 
-- [drone-docs](https://github.com/m8k8/drone-docs)：この資料リポジトリ。
-- [drone-sitl](https://github.com/m8k8/drone-sitl)：セットアップ・起動・自動テストのコード。
+- [drone-docs](https://github.com/m8k8/drone-docs)：部品表・手順書・公開用の実験記録。
+- [drone-sitl](https://github.com/m8k8/drone-sitl)：モデル・セットアップ・起動・自動試験のコード。
 
 手元では同じ親ディレクトリに配置します。
 
@@ -25,29 +23,27 @@ drone/
 └── sitl/   # drone-sitl
 ```
 
-SITLの資料は、共通の手順書と実験記録に分けて保存します。
+資料の構成は次のとおりです。
 
 ```text
 docs/
-├── README.md
+├── hardware/prototype-01/  部品表・選定根拠
 └── sitl/
     ├── README.md
     ├── guides/
     │   ├── execution.md
     │   └── visualization.md
-    └── experiments/
-        ├── 001-standard-quad/
-        │   └── README.md
-        ├── 002-g06-payload/
-        │   └── README.md
-        └── 003-prototype-bd/
-            └── README.md
+    └── experiments/003-prototype-bd/
+        ├── README.md       条件・結果・再実行方法
+        ├── model.md        モデルの仮定と再現範囲
+        ├── run-record.md   実行版・ハッシュ
+        └── figures/        軌跡・測距応答の図
 ```
 
-実施日・モデル・判定条件・結果・未検証項目は各実験の記録を参照してください。QGroundControlの共通ガイドは公式資料を調べて記載しており、GUIでの接続・表示は未検証です。
+2026-11-16の整理で、他のシミュレーション用コード・実験ページ・生ログを削除し、第１弾B〜Dの設定と本試験結果を残しました。過去のGitコミットは書き換えていません。
 
 ## 更新するとき
 
-実験の目的やモデルを変えた場合は、`sitl/experiments/`の下に番号と短い名前を付けたディレクトリを作ります。使ったコードの版、実行環境、試験条件、測定値、未検証項目を記録します。同じ実験を繰り返す場合も実施日を残し、失敗した試験を成功した記録で上書きしません。
+機体の部品・重量・配置・制御条件を変更した場合は、モデルの仮定と結果を一緒に更新します。再試験は新しい保存先を使い、既存の本試験結果へ上書きしません。現時点の11/11成功は記録したモデルと条件に対する結果で、実機の飛行性能や全搭載機器の動作を保証するものではありません。
 
-このリポジトリは手順書と公開用に整理した実験記録を管理します。手元にある購入計画Excelや旧結果JSONはGit管理対象外です。依存環境や生の実行ログは、実行コード側のGit管理対象外ディレクトリに保存します。
+購入計画Excel、依存環境、生の実行ログはGit管理対象外です。部品表の内容や元のExcelは、今回のシミュレーション整理では変更していません。

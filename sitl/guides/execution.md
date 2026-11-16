@@ -1,31 +1,24 @@
-# SITLの環境構築と標準機の実行方法
+# 第１弾（B〜D）のSITLを実行する
 
-この手順では、Macの中に仮想ドローンを起動し、離陸・位置保持・帰還・着陸を試します。実機、送信機、フライトコントローラーは不要です。
+Mac上で12.3387kgの第１弾モデルを動かし、実機なしで基本飛行・AUTO航路・下向き測距を試験する手順です。設定と再現範囲は[モデル説明](../experiments/003-prototype-bd/model.md)、既存の11回の結果は[実験003](../experiments/003-prototype-bd/README.md)を参照してください。
 
-実行コードは[drone-sitl](https://github.com/m8k8/drone-sitl)、可視化の接続方法は[可視化ガイド](visualization.md)、確認済みの範囲は[実験001：標準機の基本飛行](../experiments/001-standard-quad/README.md)にあります。
-
-環境構築は各実験で共通です。この文書の`run.sh`と`smoke-test.sh`は、総質量3kgの標準quad用です。G06の暫定モデルを使う`payload-test.sh`は別の実験であり、条件と再実行手順は[実験002](../experiments/002-g06-payload/README.md)を参照してください。[実験一覧](../README.md)で目的に合う手順を選べます。
-
-## 1. 必要なものと構成
+## 1. 必要な環境
 
 | 項目 | 使用するもの |
 | --- | --- |
 | OS・CPU | macOS / Apple Silicon |
-| コンパイラ | Xcode Command Line Tools、または開発ツールを含むXcode |
+| 開発ツール | Xcode Command Line Tools、または開発ツールを含むXcode |
 | Python | Python 3.12、プロジェクト専用の`.venv` |
-| 飛行制御 | ArduPilot `Copter-4.7.2` |
+| 飛行制御 | ArduPilot Copter 4.7.2 |
 | 固定コミット | `fb773567896014da007bca58358704d4a0d8516f` |
-| 操作画面 | MAVProxy 1.8.75のCLI |
-| 機体モデル | 総質量3kgの標準quad（QUAD/PLUS）。G06専用モデルではない |
-| 開始地点 | 公式サンプルのCMAC。利用者の実際の飛行場所ではない |
+| 機体モデル | `config/prototype-01/models/nominal.json`、12.3387kg、X配置 |
+| 開始地点 | CMACの平地。利用者の実際の飛行場所ではない |
 
-コードとPythonパッケージの初回取得にはインターネット接続が必要です。SITL向けの環境なので、実機ファームウェア用STM32クロスコンパイラは使いません。
+初回はコードとPythonパッケージを取得するため、インターネット接続が必要です。以下のコマンドはmacOSのターミナルへ入力します。
 
-## 2. ディレクトリを準備する
+## 2. 新しい環境を準備する
 
-すでに`drone/sitl`があり、セットアップとビルドが完了している場合は「4. 起動する」へ進めます。以下のcloneは新しい環境で行う手順です。
-
-作業先の親ディレクトリで、**macOSのターミナル**に入力します。
+すでに`drone/sitl`と`drone/docs`がある場合はcloneを省略します。
 
 ```bash
 mkdir -p drone
@@ -35,10 +28,6 @@ git clone https://github.com/m8k8/drone-docs.git docs
 cd sitl
 ```
 
-既存の`docs`または`sitl`がある場合は、その場所へ重ねてcloneせず、既存のディレクトリを使います。
-
-## 3. 初回セットアップとビルド
-
 開発ツールとPythonを確認します。
 
 ```bash
@@ -46,151 +35,144 @@ xcode-select -p
 /opt/homebrew/opt/python@3.12/bin/python3.12 --version
 ```
 
-不足している場合だけ、次を実行します。`brew`が未導入なら先に[Homebrew公式手順](https://brew.sh/)で導入してください。
+不足している場合だけ、Command Line ToolsとHomebrewのPythonを導入します。Homebrew自体が未導入なら[公式手順](https://brew.sh/)を使ってください。
 
 ```bash
 xcode-select --install
 brew install python@3.12
 ```
 
-`sitl`ディレクトリで準備します。
+`sitl`ディレクトリで実行します。
 
 ```bash
 ./scripts/setup.sh
-./scripts/build.sh
+./scripts/prepare-prototype.sh
 ```
 
-- `setup.sh`：固定版のArduPilotとサブモジュールを`vendor/ardupilot`へ取得し、`.venv`へ固定したCLI依存を導入します。
-- `build.sh`：`waf configure --board sitl`と`waf copter`で、このMac用の実行ファイルを作ります。
-- コードや依存のバージョンは`config/versions.env`と`requirements-cli.txt`で管理します。
-- シェル設定ファイルやグローバルPythonは変更しません。
+`setup.sh`は固定版ArduPilotとサブモジュール、CLI用のPython依存を用意します。`prepare-prototype.sh`はモデルの生成整合性と推進校正用パッチを確認し、このMac用のSITLをビルドします。単なるビルドに加え、この準備処理まで済ませてから試験します。
 
-初回ビルド後の実行ファイルは`vendor/ardupilot/build/sitl/bin/arducopter`です。各コマンドの終了を待ち、エラーで停止した場合は次へ進む前に出力を確認してください。
+実行ファイルは`vendor/ardupilot/build/sitl/bin/arducopter`です。シェル設定やグローバルPythonを変更せず、取得ソース・依存・ログをこのプロジェクト内に置きます。
 
-## 4. 起動する
+## 3. 基本飛行を1回試す
 
-`sitl`ディレクトリで実行します。
+準備済みの環境では、`drone`から次を実行します。
+
+```bash
+cd sitl
+./scripts/prototype-test.sh --scenario flight
+```
+
+専用SITLを起動し、通常のアームチェック、10m離陸、LOITER、北20m移動、RTL、着陸・自動ディスアームを確認します。`PASSED`と終了コード0が成功です。途中の拒否・タイムアウト・観測欠落は成功扱いにしません。
+
+その他のシナリオは次のとおりです。
+
+```bash
+./scripts/prototype-test.sh --scenario mission
+./scripts/prototype-test.sh --scenario rangefinder
+```
+
+`mission`は高度10mで20m四方の4地点を回り、ミッション内のRTLで帰還します。`rangefinder`は正常測距、1m短い合成測距への応答、範囲外での高度維持、正常値への復帰を調べます。範囲外値の試験であり、UART通信断の再現ではありません。
+
+## 4. 全11件の試験を実行する
+
+```bash
+./scripts/prototype-suite.sh --repeats 3
+```
+
+基準機の3シナリオを各3回、同じ推進系で質量を±0.5kg変えた基本飛行を各1回行います。実行は5倍速で、各回を新しい保存状態から始めます。
+
+保存先を指定する場合は、未使用のディレクトリ名を使います。
+
+```bash
+./scripts/prototype-suite.sh --repeats 3 --output runs/prototype-next
+```
+
+保存済みの本試験は`runs/prototype-final-20261116/`です。上書きせず、新しい試験結果は別名で保存してください。自動試験はQGroundControlへ転送せず、[保存CSVの可視化](visualization.md)を使います。
+
+## 5. MAVProxyで対話操作する
+
+`run.sh`も同じ第１弾の基準モデルを起動します。自動試験とは別のインスタンス41を使います。
 
 ```bash
 ./scripts/run.sh
 ```
 
-保存済みパラメータを初期化して練習し直す場合は、SITLを終了してから次を使います。
-
-```bash
-./scripts/run.sh --reset
-```
-
-起動後はMAVProxyの入力画面になります。`Detected vehicle`、`ArduPilot Ready`などを確認し、GPSとEKF（姿勢・位置推定）の準備を待ちます。`STABILIZE>`などの表示が入力位置の目印です。
-
-起動直後の`Connection refused sleeping`は、本体起動とのタイミング差で一時的に出ることがあります。続いて機体が検出されれば接続できています。
-
-## 5. 最初の飛行
-
-ここからのコマンドは**MAVProxyの入力欄**に入れます。macOSのシェルに入力するものではありません。
-
-### GUIDEDで離陸する
+起動後はMAVProxyの入力画面です。`ArduPilot Ready`や機体の検出を確認し、GPS・EKFの準備を待ちます。以下はmacOSのシェルではなく、MAVProxyへ入力します。
 
 ```text
 mode GUIDED
 ```
 
-GUIDEDになったらアームします。
+GUIDEDへの切替を確認してからアームします。
 
 ```text
 arm throttle
 ```
 
-`ARMED`を確認してから、10秒以内に離陸を指示します。
+`ARMED`の通知を確認してから、10秒以内に離陸を指示します。
 
 ```text
 takeoff 10
 ```
 
-`PreArm: Need Position Estimate`などで拒否されたら、表示内容を確認し、GPS・EKFの準備が終わるまで待ちます。通常のアーム判定を無効化したり、強制アームしたりする手順ではありません。
-
-### 高度を確認する
-
-上昇後に入力します。
+上昇後に高度を確認します。`GLOBAL_POSITION_INT.relative_alt`の単位はmmで、約10000が相対高度10mです。
 
 ```text
 status GLOBAL_POSITION_INT
 ```
 
-`relative_alt`はmm単位です。約`10000`が離陸基準から約10mを表します。`alt`は別の基準の高度なので、ここでは`relative_alt`を見ます。コマンドはその時点の値を表示するため、繰り返して変化を確認できます。
-
-### LOITERで位置・高度を保つ
-
-高度が安定したら、仮想RCのスロットルを中立にして切り替えます。
+高度が安定したらスロットルを中立にしてLOITERへ切り替えます。
 
 ```text
 rc 3 1500
 mode LOITER
 ```
 
-数秒待って、もう一度`status GLOBAL_POSITION_INT`を入力します。位置と高度が大きく変わらないことを確認します。LOITERではスロットルが上昇・下降指示になるため、中立値1500を先に送っています。
-
-### RTLで帰還・着陸する
+帰還・着陸は次の指示です。接地して`DISARMED`の通知が出るまで待ちます。
 
 ```text
 mode RTL
 ```
 
-着陸し、`DISARMED`が表示されるまで待ちます。RTL設定によっては一度高度を上げます。この練習では離陸地点付近の上空にいるため、水平移動はほとんどありません。
-
-その場への着陸を指示する場合は次を使います。
-
-```text
-mode LAND
-```
-
-### 終了する
-
-着陸・ディスアーム後に`Ctrl+C`で終了します。シェルへ戻れば、次回は再び`./scripts/run.sh`で起動できます。シミュレーターを閉じる操作と、機体への着陸指示は別です。
-
-## 6. 自動テストを実行する
-
-macOSのシェルで、`sitl`ディレクトリから実行します。
+終了は`Ctrl+C`。対話用の保存先は`runs/prototype-manual/`です。通常起動では保存パラメータを継続し、設定を初期化する場合だけ、SITLを終了してから次を使います。
 
 ```bash
-./scripts/smoke-test.sh
+./scripts/run.sh --reset
 ```
 
-独立したSITLを起動し、heartbeat、GPS・EKF・pre-arm、GUIDED、通常アーム、10m離陸、LOITER、RTL、着陸・自動ディスアームを確認します。`PASS`と終了コード0が成功です。
+`--reset`は保存パラメータの`eeprom.bin`を初期化する指定です。機体モデルは常に第１弾のnominalを使います。アームが拒否された場合はPreArmの理由を確認し、チェックを無効化せずに対処します。
 
-自動テストは5倍速・専用の実行ディレクトリを使います。通常の対話起動とは別のプロセスで、既存のTCP 5760の機体には接続しません。この自動テストの通信をQGroundControlへ転送する設定は含まれていません。可視化したいときは`run.sh`を使います。
+対話起動は機体のTCP 6170と仮想RCのUDP 5911を使い、MAVProxyからQGroundControl向けUDP 14550へ転送します。機体ログ・通信ログは対話用ディレクトリ内に保存します。機体側の起動・終了処理は、この起動で作ったプロセスを対象とします。
 
-## 7. ログの保存先
+## 6. 結果とログ
 
-以下は`drone-sitl`リポジトリのルートからの相対パスです。
+| 保存物 | 内容 |
+| --- | --- |
+| suite直下の`suite.json` | 全試験の成否・終了コード・summaryのハッシュ |
+| 各runの`summary.json` | 判定条件・測定値・エラー・BINハッシュ |
+| `run.json` | コードの版、入力ハッシュ、起動コマンド |
+| `model.json`・`experiment.parm`など | 実行時の設定とプログラムのコピー |
+| `telemetry.csv` | 推定位置と真値、モード、高度、PWM、電流、測距の時系列 |
+| `sitl.log` | SITLの起動・動作メッセージ |
+| `logs/*.BIN` | 機体内部のDataFlashログ |
 
-| 記録 | 保存先 | 内容 |
-| --- | --- | --- |
-| 保存パラメータ・状態 | `runs/default/` | 通常起動の状態。`--reset`でパラメータ初期化 |
-| 機体ログ | `runs/default/logs/*.BIN` | 機体側の記録 |
-| 通信ログ | `runs/default/mav.tlog` | MAVProxyが受信したテレメトリー |
-| 自動試験の結果 | `runs/smoke-*/summary.json` | 成否、各ステップ、測定値 |
-| 自動試験の起動ログ | `runs/smoke-*/sitl.log` | 試験専用SITLの標準出力・エラー |
-| 対話起動時の本体メッセージ | `/tmp/ArduCopter.log` | 公式headless launcherの出力。次回起動で上書き |
+結果表は次で表示できます。
 
-必要な実験ログは次の起動前に別の場所へ保存してください。`runs/`はGit管理対象外です。公開するテスト記録は、[実験001の結果](../experiments/001-standard-quad/README.md)のように試験条件と観測値を整理し、実験ごとのディレクトリに保存します。
+```bash
+.venv/bin/python scripts/summarize_prototype.py runs/prototype-final-20261116
+```
 
-## 8. うまく動かないとき
+生ログはGit管理対象外です。現在の本試験の入力コピーには、当時使った共通コードの旧ファイル名も残っています。これは結果の追跡用スナップショットで、現在の実行コードは`scripts/`、モデルは`config/prototype-01/`を使います。
+
+## 7. うまく動かないとき
 
 | 状態 | 確認すること |
 | --- | --- |
 | Python 3.12が見つからない | Homebrewの`python@3.12`を確認。別の場所なら`SITL_PYTHON=/path/to/python3.12 ./scripts/setup.sh`を使用 |
-| 実行ファイルがない | `./scripts/build.sh`が成功したか確認 |
-| TCP 5760が使用中 | 先に起動したSITLをそのターミナルで終了してから再実行 |
-| 接続拒否が繰り返される | `/tmp/ArduCopter.log`で本体の起動失敗を確認 |
-| アームできない | `PreArm`の原因とGPS・EKFの準備状態を確認 |
-| 離陸しない | GUIDED、ARMED、アームから離陸指示までの時間を確認 |
-| LOITERで降下する | `rc 3 1500`を送ってスロットルを中立にする |
-| 地図が出ない | 現在の起動はCLI。別途[可視化ガイド](visualization.md)でQGroundControlを接続 |
+| 実行ファイルがない・パッチ検査に失敗 | `./scripts/prepare-prototype.sh`の出力を確認 |
+| ポート使用中 | 対話起動はinstance 41、自動試験は既定instance 40。同じインスタンスの既存起動を終了してから再実行する |
+| アームできない | 各runの`sitl.log`と`summary.json`でPreArm・GPS・EKF状態を確認 |
+| 試験が失敗した | `summary.json`のerrorとCSV/BINを確認。アームチェックや合格条件を無効化しない |
+| 図が出ない | [可視化ガイド](visualization.md)で、成功済みsuiteと描画用依存を確認 |
 
-## 参照
-
-- [ArduPilot：macOSビルド環境](https://ardupilot.org/dev/docs/building-setup-mac.html)
-- [ArduPilot：SITLの使い方](https://ardupilot.org/dev/docs/using-sitl-for-ardupilot-testing.html)
-- [ArduPilot：Copter SITL/MAVProxyチュートリアル](https://ardupilot.org/dev/docs/copter-sitl-mavproxy-tutorial.html)
-- [MAVLink：GLOBAL_POSITION_INT](https://mavlink.io/en/messages/common.html#GLOBAL_POSITION_INT)
+[第１弾のSITLへ戻る](../README.md)
