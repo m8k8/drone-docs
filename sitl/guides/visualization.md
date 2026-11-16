@@ -2,9 +2,9 @@
 
 確認日：2026-11-16
 
-まず、起動済みのSITLをQGroundControl（QGC）へ接続し、地図・高度・姿勢・飛行モードを表示します。既存の[`run.sh`](https://github.com/m8k8/drone-sitl/blob/main/scripts/run.sh)で起動すると、QGCへデータを転送する構成になります。
+この文書は、標準機を起動する[`run.sh`](https://github.com/m8k8/drone-sitl/blob/main/scripts/run.sh)とQGroundControl（QGC）を接続し、地図・高度・姿勢・飛行モードを表示する共通ガイドです。`run.sh`はQGCへデータを転送します。各実験専用の自動テストが同じ通信先を使うとは限らないため、実験ごとの可視化・ログ解析手順は[実験一覧](../README.md)から確認してください。
 
-**この文書のQGC手順は公式資料と接続設定を確認したもので、GUIでの接続・表示はまだ実行検証していません。** 実施済みなのはMAVProxy CLIによる状態確認と基本飛行テストです。[実行手順](sitl-execution.md)と[テスト結果](sitl-test-results.md)も参照してください。
+**この文書のQGC手順は公式資料と接続設定を確認したもので、GUIでの接続・表示はまだ実行検証していません。** 実施済みなのはMAVProxy CLIによる状態確認と基本飛行テストです。[実行手順](execution.md)と[実験001の結果](../experiments/001-standard-quad/README.md)も参照してください。
 
 ## 1. 現在の構成で見られるもの
 
@@ -13,7 +13,7 @@
 | MAVProxy CLI | 高度、位置、姿勢、飛行モードなどの数値 | 導入済み。相対高度の表示を確認済み |
 | QGroundControl | 地図上の機体位置、飛行軌跡、計器、リアルタイムの数値グラフ | 以下に導入手順を記載。GUI接続は未検証 |
 | MAVProxyの`--map`・`--console` | MAVProxy自身の地図・GUI計器 | 現在はGUI依存が未導入。`run.sh`もこれらの引数を受け付けない |
-| G06の詳細な3D・物理シミュレーション | 機体形状、積載、散布系を含む挙動 | 未実装。現在はArduPilot標準quadの物理モデル |
+| G06の詳細な3D表示・散布の可視化 | 機体形状、液体や散布の様子 | この手順には含まない。G06の暫定物理モデルの検証は[実験002](../experiments/002-g06-payload/README.md)で扱う |
 
 QGCはSITLが計算した位置・姿勢などを表示する地上局です。QGCを追加しても、機体モデルがG06に変わったり、カメラ映像が生成されたりするわけではありません。
 
@@ -77,7 +77,7 @@ QGCにはUDPの自動接続機能があり、標準の自動接続受信ポー�
 
 ## 5. 飛行中に観察する
 
-最初の飛行は[実行手順](sitl-execution.md)に沿って、MAVProxyでGUIDED・アーム・10m離陸・LOITER・RTLを順に実行します。
+最初の飛行は[実行手順](execution.md)に沿って、MAVProxyでGUIDED・アーム・10m離陸・LOITER・RTLを順に実行します。
 
 | 観察対象 | 確認する内容 |
 | --- | --- |
@@ -118,7 +118,7 @@ status HEARTBEAT
 
 `status`は、その時点でMAVProxyが保持する受信値を表示します。連続グラフではないので、変化を確認するには再入力します。
 
-実施済みの手動飛行では`GLOBAL_POSITION_INT.relative_alt`が`9999`、LOITER中に`10000`となることを確認しました。これは相対高度9.999m、10.000mに相当します。他の表示やGUIの検証状況は[テスト結果](sitl-test-results.md)で区別しています。
+実験001の手動飛行では`GLOBAL_POSITION_INT.relative_alt`が`9999`、LOITER中に`10000`となることを確認しました。これは相対高度9.999m、10.000mに相当します。他の表示やGUIの検証状況は[実験001の結果](../experiments/001-standard-quad/README.md)で区別しています。
 
 ## 8. 現在のMAVProxy GUIについて
 

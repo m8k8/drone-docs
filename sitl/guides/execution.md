@@ -1,8 +1,10 @@
-# SITLの実行方法
+# SITLの環境構築と標準機の実行方法
 
 この手順では、Macの中に仮想ドローンを起動し、離陸・位置保持・帰還・着陸を試します。実機、送信機、フライトコントローラーは不要です。
 
-実行コードは[drone-sitl](https://github.com/m8k8/drone-sitl)、可視化の接続方法は[可視化ガイド](sitl-visualization.md)、確認済みの範囲は[テスト結果](sitl-test-results.md)にあります。
+実行コードは[drone-sitl](https://github.com/m8k8/drone-sitl)、可視化の接続方法は[可視化ガイド](visualization.md)、確認済みの範囲は[実験001：標準機の基本飛行](../experiments/001-standard-quad/README.md)にあります。
+
+環境構築は各実験で共通です。この文書の`run.sh`と`smoke-test.sh`は、総質量3kgの標準quad用です。G06の暫定モデルを使う`payload-test.sh`は別の実験であり、条件と再実行手順は[実験002](../experiments/002-g06-payload/README.md)を参照してください。[実験一覧](../README.md)で目的に合う手順を選べます。
 
 ## 1. 必要なものと構成
 
@@ -14,7 +16,7 @@
 | 飛行制御 | ArduPilot `Copter-4.7.2` |
 | 固定コミット | `fb773567896014da007bca58358704d4a0d8516f` |
 | 操作画面 | MAVProxy 1.8.75のCLI |
-| 機体モデル | 標準quad（QUAD/PLUS）。G06専用モデルではない |
+| 機体モデル | 総質量3kgの標準quad（QUAD/PLUS）。G06専用モデルではない |
 | 開始地点 | 公式サンプルのCMAC。利用者の実際の飛行場所ではない |
 
 コードとPythonパッケージの初回取得にはインターネット接続が必要です。SITL向けの環境なので、実機ファームウェア用STM32クロスコンパイラは使いません。
@@ -171,7 +173,7 @@ macOSのシェルで、`sitl`ディレクトリから実行します。
 | 自動試験の起動ログ | `runs/smoke-*/sitl.log` | 試験専用SITLの標準出力・エラー |
 | 対話起動時の本体メッセージ | `/tmp/ArduCopter.log` | 公式headless launcherの出力。次回起動で上書き |
 
-必要な実験ログは次の起動前に別の場所へ保存してください。`runs/`はGit管理対象外です。公開するテスト記録は、本資料の[結果ページ](sitl-test-results.md)のように試験条件と観測値を整理します。
+必要な実験ログは次の起動前に別の場所へ保存してください。`runs/`はGit管理対象外です。公開するテスト記録は、[実験001の結果](../experiments/001-standard-quad/README.md)のように試験条件と観測値を整理し、実験ごとのディレクトリに保存します。
 
 ## 8. うまく動かないとき
 
@@ -184,7 +186,7 @@ macOSのシェルで、`sitl`ディレクトリから実行します。
 | アームできない | `PreArm`の原因とGPS・EKFの準備状態を確認 |
 | 離陸しない | GUIDED、ARMED、アームから離陸指示までの時間を確認 |
 | LOITERで降下する | `rc 3 1500`を送ってスロットルを中立にする |
-| 地図が出ない | 現在の起動はCLI。別途[可視化ガイド](sitl-visualization.md)でQGroundControlを接続 |
+| 地図が出ない | 現在の起動はCLI。別途[可視化ガイド](visualization.md)でQGroundControlを接続 |
 
 ## 参照
 
