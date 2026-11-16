@@ -4,13 +4,14 @@
 
 この文書は、標準機を起動する[`run.sh`](https://github.com/m8k8/drone-sitl/blob/main/scripts/run.sh)とQGroundControl（QGC）を接続し、地図・高度・姿勢・飛行モードを表示する共通ガイドです。`run.sh`はQGCへデータを転送します。各実験専用の自動テストが同じ通信先を使うとは限らないため、実験ごとの可視化・ログ解析手順は[実験一覧](../README.md)から確認してください。
 
-**この文書のQGC手順は公式資料と接続設定を確認したもので、GUIでの接続・表示はまだ実行検証していません。** 実施済みなのはMAVProxy CLIによる状態確認と基本飛行テストです。[実行手順](execution.md)と[実験001の結果](../experiments/001-standard-quad/README.md)も参照してください。
+**この文書のQGC手順は公式資料と接続設定を確認したもので、GUIでの接続・表示はまだ実行検証していません。** 標準機ではMAVProxy CLIによる状態確認と基本飛行テストを実施済みです。[実行手順](execution.md)と[実験001の結果](../experiments/001-standard-quad/README.md)も参照してください。第１弾B〜Dについては、[実験003](../experiments/003-prototype-bd/README.md)で保存したCSVから航路と測距応答のグラフを生成・確認しています。
 
 ## 1. 現在の構成で見られるもの
 
 | 方法 | 見られるもの | 現在の状態 |
 | --- | --- | --- |
 | MAVProxy CLI | 高度、位置、姿勢、飛行モードなどの数値 | 導入済み。相対高度の表示を確認済み |
+| 保存したCSVとMatplotlib | 飛行軌跡、推定・真値の高度、測距への応答 | [実験003](../experiments/003-prototype-bd/README.md)でSVG・PNGを生成・確認済み。再生成手順も記載 |
 | QGroundControl | 地図上の機体位置、飛行軌跡、計器、リアルタイムの数値グラフ | 以下に導入手順を記載。GUI接続は未検証 |
 | MAVProxyの`--map`・`--console` | MAVProxy自身の地図・GUI計器 | 現在はGUI依存が未導入。`run.sh`もこれらの引数を受け付けない |
 | G06の詳細な3D表示・散布の可視化 | 機体形状、液体や散布の様子 | この手順には含まない。G06の暫定物理モデルの検証は[実験002](../experiments/002-g06-payload/README.md)で扱う |

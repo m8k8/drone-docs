@@ -7,6 +7,7 @@
 | 読みたいこと | 資料 |
 | --- | --- |
 | 第１弾（B〜D）の搭載部品、選定理由、重量 | [第１弾の部品表](hardware/prototype-01/README.md) |
+| 第１弾のSITLモデル、航路・測距の試験結果 | [実験003](sitl/experiments/003-prototype-bd/README.md) |
 | 実験の目的、現在の検証範囲、結果 | [SITLの実験一覧](sitl/README.md) |
 | 環境構築、標準機の起動、最初の飛行、終了 | [実行ガイド](sitl/guides/execution.md) |
 | 地図、姿勢、高度、テレメトリーを見る | [可視化ガイド](sitl/guides/visualization.md) |
@@ -37,7 +38,9 @@ docs/
     └── experiments/
         ├── 001-standard-quad/
         │   └── README.md
-        └── 002-g06-payload/
+        ├── 002-g06-payload/
+        │   └── README.md
+        └── 003-prototype-bd/
             └── README.md
 ```
 

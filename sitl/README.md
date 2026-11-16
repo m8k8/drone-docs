@@ -6,13 +6,14 @@
 | --- | --- | --- |
 | [001：標準quadの基本飛行](experiments/001-standard-quad/README.md) | 総質量3kgの標準機で環境構築、基本操作、自動テストを確認 | 2026-11-16実施。基本飛行に成功。G06の性能検証は対象外 |
 | [002：G06暫定モデルの積載比較](experiments/002-g06-payload/README.md) | 計画値と仮定を区別したモデルで、空荷と水1L・3L・5Lを比較 | 2026-11-16実施。4荷重×3回、12/12成功。重量・電流モデルの限界を併記 |
+| [003：第１弾B〜Dの構成・機能](experiments/003-prototype-bd/README.md) | 部品表の12.3387kg、仮の重心・慣性、AUTO航路、下向き測距の応答と範囲外・復帰、±0.5kg比較 | 2026-11-16実施。11/11成功。軌跡・測距応答の図、再現できない機能も記載 |
 
 ## 共通の手順
 
 - [環境構築と標準機の実行方法](guides/execution.md)：セットアップ、`run.sh`による対話操作、`smoke-test.sh`による基本動作確認。
 - [可視化方法](guides/visualization.md)：標準機とQGroundControlの接続、数値・グラフの見方。GUIの接続・描画は未検証。
 
-`run.sh`は標準quadを起動します。G06の積載比較で使う`payload-test.sh`とは、モデルと試験条件が異なります。各実験の再実行手順を選んでください。自動テストがQGroundControlへ通信を転送するとは限りません。
+`run.sh`は標準quadを起動します。G06の積載比較で使う`payload-test.sh`、第１弾B〜Dの`prototype-test.sh`とは、モデルと試験条件が異なります。各実験の再実行手順を選んでください。自動テストがQGroundControlへ通信を転送するとは限りません。
 
 ## 記録の読み方
 
