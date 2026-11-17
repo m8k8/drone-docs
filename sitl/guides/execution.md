@@ -72,6 +72,8 @@ cd sitl
 ./scripts/prototype-test.sh --scenario sloped_field
 ./scripts/prototype-test.sh --scenario stepped_field
 ./scripts/prototype-test.sh --scenario planned_step_crossing
+./scripts/prototype-test.sh --scenario battery_failsafe
+./scripts/prototype-test.sh --scenario battery_failsafe_critical
 ./scripts/prototype-test.sh --scenario rangefinder
 ```
 
@@ -95,6 +97,15 @@ cd sitl
 
 ```bash
 ./scripts/prototype-test.sh --scenario planned_step_crossing --gazebo
+```
+
+バッテリーフェイルセーフは、平坦な圃場をAUTO飛行中にSITLの模擬電圧を下げて試験します。`battery_failsafe` は低電圧でRTLへ切り替わり、離陸地点のパッドに帰還・着陸するケースです。`battery_failsafe_critical` は帰還中にさらに電圧を下げ、LANDへ切り替わってその地点付近に着陸するケースです。
+
+この試験では低電圧のしきい値を42.0 V、危険域のしきい値を40.8 Vとし、負荷がかかった状態の電圧がしきい値を下回って2秒続くと判定します。`summary.json` には機体ログで確認した切り替え理由と着陸位置の判定を、`telemetry.csv` には電圧と飛行モードの時系列を保存します。Gazebo Jettyをセットアップした環境では、次のコマンドで飛行を表示できます。
+
+```bash
+./scripts/prototype-test.sh --scenario battery_failsafe --gazebo
+./scripts/prototype-test.sh --scenario battery_failsafe_critical --gazebo
 ```
 
 ## 4. 全11件の試験を実行する
