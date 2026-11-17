@@ -69,12 +69,33 @@ cd sitl
 ```bash
 ./scripts/prototype-test.sh --scenario mission
 ./scripts/prototype-test.sh --scenario field
+./scripts/prototype-test.sh --scenario sloped_field
+./scripts/prototype-test.sh --scenario stepped_field
+./scripts/prototype-test.sh --scenario planned_step_crossing
 ./scripts/prototype-test.sh --scenario rangefinder
 ```
 
 `mission`は高度10mで20m四方の4地点を回り、ミッション内のRTLで帰還します。`rangefinder`は正常測距、1m短い合成測距への応答、範囲外での高度維持、正常値への復帰を調べます。範囲外値の試験であり、UART通信断の再現ではありません。
 
 `field`は平坦な圃場の脇から離陸し、相対高度10mで3列の6地点をジグザグに回って帰還・着陸します。初回に`./scripts/setup-gazebo.sh`を実行しておくと、`./scripts/prototype-test.sh --scenario field --gazebo`で圃場を表示しながら実行できます。到達と着地の判定は実行先の`summary.json`に記録されます。
+
+`sloped_field`は、北へ20 m進むごとに地面が1 m高くなる圃場で、AUTO飛行中の対地高度10 mを試験します。高度の許容差は±0.5 mです。実行先の `summary.json` に測定値と判定、`terrain-following.csv` に対地高度と測距の時系列を保存します。Gazebo Jettyのセットアップ後は、次のコマンドで斜面と飛行の様子を表示できます。
+
+```bash
+./scripts/prototype-test.sh --scenario sloped_field --gazebo
+```
+
+`stepped_field`は、地面が水平距離1 mの間に1 m高くなる段差を、目標対地高度10 mで上り、下り、上りの順に横切ります。実行先の `summary.json` に、通過ごとの最低対地高度と回復時間を記録します。回復時間は段差の移行区間に入ってから、通過後の対地高度が9.75〜10.25 mに1秒以上とどまった区間の始まりまでです。`terrain-following.csv` で対地高度と測距の推移を確認できます。Gazebo Jettyのセットアップ後は、次のコマンドで段差のある圃場を表示できます。
+
+```bash
+./scripts/prototype-test.sh --scenario stepped_field --gazebo
+```
+
+`planned_step_crossing`は、高さ10 mの段差を事前に高度を設定したAUTO航路で往復します。離陸地点からの相対高度22 mで段差を越え、高い側の点検地点では対地高度10 mを目標にします。帰路では相対高度22 mで段差を下り、低い側で相対高度10 mに下がって帰還します。実行先の `summary.json` で段差通過時の最低対地高度と判定を、`terrain-following.csv` で時系列を確認できます。Gazebo Jettyをセットアップした環境では、次のコマンドで飛行を表示できます。
+
+```bash
+./scripts/prototype-test.sh --scenario planned_step_crossing --gazebo
+```
 
 ## 4. 全11件の試験を実行する
 
@@ -155,6 +176,7 @@ mode RTL
 | 各runの`summary.json` | 判定条件・測定値・エラー・BINハッシュ |
 | `run.json` | コードの版、入力ハッシュ、起動コマンド |
 | `model.json`・`experiment.parm`など | 実行時の設定とプログラムのコピー |
+| `scenarios/` | シナリオの実行コードと、実行時に使用した共通処理や表示コードのコピー |
 | `telemetry.csv` | 推定位置と真値、モード、高度、PWM、電流、測距の時系列 |
 | `sitl.log` | SITLの起動・動作メッセージ |
 | `logs/*.BIN` | 機体内部のDataFlashログ |
