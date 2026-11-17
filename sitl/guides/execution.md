@@ -68,10 +68,13 @@ cd sitl
 
 ```bash
 ./scripts/prototype-test.sh --scenario mission
+./scripts/prototype-test.sh --scenario field
 ./scripts/prototype-test.sh --scenario rangefinder
 ```
 
 `mission`は高度10mで20m四方の4地点を回り、ミッション内のRTLで帰還します。`rangefinder`は正常測距、1m短い合成測距への応答、範囲外での高度維持、正常値への復帰を調べます。範囲外値の試験であり、UART通信断の再現ではありません。
+
+`field`は平坦な圃場の脇から離陸し、相対高度10mで3列の6地点をジグザグに回って帰還・着陸します。初回に`./scripts/setup-gazebo.sh`を実行しておくと、`./scripts/prototype-test.sh --scenario field --gazebo`で圃場を表示しながら実行できます。到達と着地の判定は実行先の`summary.json`に記録されます。
 
 ## 4. 全11件の試験を実行する
 
@@ -79,7 +82,7 @@ cd sitl
 ./scripts/prototype-suite.sh --repeats 3
 ```
 
-基準機の3シナリオを各3回、同じ推進系で質量を±0.5kg変えた基本飛行を各1回行います。実行は5倍速で、各回を新しい保存状態から始めます。
+基準機で`flight`、`mission`、`rangefinder`を各3回、同じ推進系で質量を±0.5kg変えた基本飛行を各1回行います。実行は5倍速で、各回を新しい保存状態から始めます。
 
 保存先を指定する場合は、未使用のディレクトリ名を使います。
 
